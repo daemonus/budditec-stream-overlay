@@ -24,5 +24,9 @@ An earlier Tauri (web view) prototype was compared and dropped; it's kept at the
 4. Press **Ctrl+Alt+O** to toggle edit mode: drag widgets to move them, resize from the corner grip, and press
    again to lock them and make them click-through.
 
+To build a standalone copy (no .NET install needed), run
+`dotnet publish src/Budditec.Overlay.Desktop -c Release -r win-x64 --self-contained -o publish` and start
+`publish/Budditec.Overlay.Desktop.exe`.
+
 Widgets (stream status, chat) can be turned on or off under Widgets in settings. Settings are saved to
 `%AppData%/Budditec.Overlay/settings.json`, and hand edits to that file are picked up live.

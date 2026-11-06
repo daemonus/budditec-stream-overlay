@@ -21,6 +21,13 @@ compared and dropped (kept at the `tauri-prototype` git tag).
 - Test: `dotnet test --project tests/Budditec.Overlay.Core.Tests` (Microsoft.Testing.Platform, set in
   `global.json`)
 - Run: `dotnet run --project src/Budditec.Overlay.Desktop` (`-- --settings` opens settings)
+- Publish: `dotnet publish src/Budditec.Overlay.Desktop -c Release -r win-x64 --self-contained -o publish`
+  (about 200 MB, needs no .NET install). Smoke-test the exe with `BUDDITEC_OVERLAY_SETTINGS` (temp file),
+  `BUDDITEC_OVERLAY_SIMULATE_CHAT=5` and `BUDDITEC_OVERLAY_STATS`; the simulator waits ~20 s before sending.
+
+App icon: `assets/icon/icon-512.png` is the master (made with IconKitchen; `icon-1024-square.png` and
+`icon-monochrome.png` are spares). `powershell -ExecutionPolicy Bypass -File assets/icon/make-ico.ps1`
+rebuilds `src/Budditec.Overlay.Desktop/Assets/icon.ico`, which is the exe, tray and settings-window icon.
 
 Package versions are central in `Directory.Packages.props`. Prefer versions published at least 7 days ago.
 
