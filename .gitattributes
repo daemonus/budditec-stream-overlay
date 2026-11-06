@@ -1,0 +1,2 @@
+# Run inside Linux containers; CRLF breaks bash and the shebang-less scripts.
+tests/x11-smoke/** text eol=lf

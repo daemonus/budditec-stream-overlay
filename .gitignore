@@ -6,3 +6,4 @@ obj/
 *.DotSettings.user
 TestResults/
 publish/
+publish-*/

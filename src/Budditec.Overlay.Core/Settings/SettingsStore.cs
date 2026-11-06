@@ -11,8 +11,14 @@ public sealed class SettingsStore(string path)
         Converters = { new JsonStringEnumConverter() },
     };
 
+    /// <summary>
+    /// %AppData% on Windows, ~/Library/Application Support on macOS, $XDG_CONFIG_HOME or ~/.config on Linux.
+    /// </summary>
     public static string DefaultPath { get; } = Diagnostics.DevOptions.SettingsPath ?? System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Budditec.Overlay", "settings.json");
+        OperatingSystem.IsMacOS()
+            ? System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support")
+            : Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "Budditec.Overlay", "settings.json");
 
     public string Path { get; } = path;
 
