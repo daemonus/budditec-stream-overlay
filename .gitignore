@@ -5,6 +5,3 @@ obj/
 *.user
 *.DotSettings.user
 TestResults/
-
-tauri/src-tauri/target/
-tauri/src-tauri/gen/
