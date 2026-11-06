@@ -44,6 +44,37 @@ public class OverlaySettingsTests
         Assert.Equal(("budditec", "ws://x:1"), (settings.Twitch.Channel, settings.Obs.Url));
     }
 
+    [Fact]
+    public void AudioSourcesShowUnlessHidden()
+    {
+        var settings = new OverlaySettings { Audio = { HiddenSources = ["Desktop Audio", "Desktop Audio"] } };
+
+        settings.Normalize();
+
+        Assert.Equal(["Desktop Audio"], settings.Audio.HiddenSources);
+        Assert.False(settings.Audio.IsSourceShown("Desktop Audio"));
+        Assert.True(settings.Audio.IsSourceShown("Mic/Aux"));
+    }
+
+
+    [Fact]
+    public void UpgradeSplitsTheOldStatusWidget()
+    {
+        var settings = new OverlaySettings
+        {
+            Widgets = { ["status"] = new WidgetBounds(10, 20, 320, 220) },
+            DisabledWidgets = ["status", OverlayWidgets.Chat],
+        };
+
+        settings.Upgrade();
+
+        Assert.Equal(new WidgetBounds(10, 20, 110, 36), settings.Widgets[OverlayWidgets.Recording]);
+        Assert.Equal(new WidgetBounds(120, 20, 210, 36), settings.Widgets[OverlayWidgets.Live]);
+        Assert.Equal(new WidgetBounds(10, 60, 320, 180), settings.Widgets[OverlayWidgets.Microphones]);
+        Assert.False(settings.Widgets.ContainsKey("status"));
+        Assert.Equal([OverlayWidgets.Chat, OverlayWidgets.Recording, OverlayWidgets.Live, OverlayWidgets.Microphones], settings.DisabledWidgets);
+    }
+
     [Theory]
     [InlineData("Budditec", "budditec")]
     [InlineData("#budditec", "budditec")]

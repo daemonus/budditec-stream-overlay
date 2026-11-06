@@ -30,7 +30,12 @@ To build a standalone copy (no .NET install needed), run
 `publish/Budditec.Overlay.Desktop.exe`. Use `-r osx-arm64` (Apple Silicon), `osx-x64` or `linux-x64` for the
 other platforms; these can be built from any OS.
 
-Widgets (stream status, chat) can be turned on or off under Widgets in settings. Settings are saved to
+Each widget (chat, live status, microphone status, recording status) has its own page under Widgets in settings,
+with a checkbox to turn it on or off. The microphone widget shows every audio source in the current OBS scene
+(untick any you don't want; hidden sources stay hidden in every scene, and anything not hidden shows), either
+in full (icon, name, level meter) or minimal: a dot per source that turns
+green, yellow or red with the level, labelled with its number or a short name. Hover a dot in edit mode to see
+the source's full name. Settings are saved to
 `settings.json` in `%AppData%\Budditec.Overlay` (Windows), `~/Library/Application Support/Budditec.Overlay`
 (macOS) or `~/.config/Budditec.Overlay` (Linux), and hand edits to that file are picked up live.
 

@@ -3,6 +3,26 @@ using Budditec.Overlay.Core.Obs;
 
 namespace Budditec.Overlay.Core.Tests;
 
+public class AudioSourceNamesTests
+{
+    [Theory]
+    [InlineData("Desktop Audio", "DA")]
+    [InlineData("Mic/Aux", "MA")]
+    [InlineData("Mic 2", "M2")]
+    [InlineData("Discord", "Dis")]
+    [InlineData("go", "Go")]
+    [InlineData("Elgato Wave:3 Microphone", "EW3")]
+    [InlineData("--", "--")]
+    public void Abbreviate(string name, string expected) => Assert.Equal(expected, AudioSourceNames.Abbreviate(name));
+
+    [Theory]
+    [InlineData(-40, LevelBand.Green)]
+    [InlineData(-20, LevelBand.Yellow)]
+    [InlineData(-9, LevelBand.Red)]
+    [InlineData(0, LevelBand.Red)]
+    public void BandsMatchObsMixer(double peakDb, LevelBand expected) => Assert.Equal(expected, AudioSourceNames.Band(peakDb));
+}
+
 public class ObsTests
 {
     [Fact]
@@ -32,6 +52,20 @@ public class ObsTests
         Assert.Equal(20 * Math.Log10(0.5), levels["Mic"].PeakDb, 6);
         Assert.Equal(20 * Math.Log10(0.2), levels["Mic"].MagnitudeDb, 6);
         Assert.Equal(double.NegativeInfinity, levels["Silent"].PeakDb);
+    }
+
+    [Fact]
+    public void SilentInputsStillCountAsAudibleButOnesWithoutChannelsDont()
+    {
+        // A quiet mic still sends (silent) audio; a browser source not routing audio to OBS has no channels.
+        using var doc = JsonDocument.Parse("""
+            {"inputs":[
+              {"inputName":"Mic","inputLevelsMul":[[0,0,0]]},
+              {"inputName":"Twitch Alerts","inputLevelsMul":[]}
+            ]}
+            """);
+
+        Assert.Equal(["Mic"], ObsMonitor.AudibleInputs(doc.RootElement));
     }
 
     [Fact]

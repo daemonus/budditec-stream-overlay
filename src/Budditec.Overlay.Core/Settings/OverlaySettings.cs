@@ -14,6 +14,7 @@ public sealed partial class OverlaySettings
     public ObsSettings Obs { get; set; } = new();
     public ChatStyle ChatStyle { get; set; } = new();
     public AudioWidgetSettings Audio { get; set; } = new();
+    public LiveWidgetSettings Live { get; set; } = new();
 
     /// <summary>Saved widget bounds in screen pixels, keyed by widget id.</summary>
     public Dictionary<string, WidgetBounds> Widgets { get; set; } = new();
@@ -39,6 +40,24 @@ public sealed partial class OverlaySettings
         Obs.Url = Obs.Url.Trim();
         ChatStyle.FontFamily = ChatStyle.FontFamily.Trim();
         DisabledWidgets = DisabledWidgets.Distinct().ToList();
+        Audio.HiddenSources = Audio.HiddenSources.Distinct().ToList();
+    }
+
+    /// <summary>
+    /// Brings settings from older versions forward: the "status" widget (REC, LIVE and microphones together) is
+    /// now three widgets, laid out where its parts used to be.
+    /// </summary>
+    public void Upgrade()
+    {
+        const string legacyStatus = "status";
+        if (Widgets.Remove(legacyStatus, out var s))
+        {
+            Widgets.TryAdd(OverlayWidgets.Recording, s with { Width = 110, Height = 36 });
+            Widgets.TryAdd(OverlayWidgets.Live, s with { X = s.X + 110, Width = Math.Max(s.Width - 110, 120), Height = 36 });
+            Widgets.TryAdd(OverlayWidgets.Microphones, s with { Y = s.Y + 40, Height = Math.Max(s.Height - 40, 60) });
+        }
+        if (DisabledWidgets.Remove(legacyStatus))
+            DisabledWidgets.AddRange([OverlayWidgets.Recording, OverlayWidgets.Live, OverlayWidgets.Microphones]);
     }
 
     /// <summary>The first problem with these settings, or null when they're fine to save.</summary>
@@ -70,14 +89,10 @@ public sealed partial class OverlaySettings
 /// <summary>The overlay widgets; ids key bounds and the on/off list.</summary>
 public static class OverlayWidgets
 {
-    public const string Status = "status";
+    public const string Recording = "recording";
+    public const string Live = "live";
+    public const string Microphones = "microphones";
     public const string Chat = "chat";
-
-    public static IReadOnlyList<(string Id, string Name)> All { get; } =
-    [
-        (Status, "Stream status (REC / LIVE / microphones)"),
-        (Chat, "Chat"),
-    ];
 }
 
 public sealed class ChatChannelSettings
@@ -98,13 +113,46 @@ public sealed class ObsSettings
 
 public sealed class AudioWidgetSettings
 {
-    /// <summary>Input names to show. Empty means every audio input in the current scene.</summary>
-    public List<string> SelectedSources { get; set; } = [];
+    /// <summary>
+    /// Input names the microphones widget leaves out, in every scene. A hide list rather than a show list, so
+    /// new sources and sources from other scenes show by default, and switching scenes doesn't lose the choice.
+    /// </summary>
+    public List<string> HiddenSources { get; set; } = [];
+
+    public bool IsSourceShown(string name) => !HiddenSources.Contains(name);
+
+    public MicrophoneDisplay Display { get; set; } = MicrophoneDisplay.Full;
+
+    /// <summary>What goes under each dot in the minimal display.</summary>
+    public MicrophoneLabel MinimalLabel { get; set; } = MicrophoneLabel.Number;
 
     public double SpeakingThresholdDb { get; set; } = -45;
 
     /// <summary>How long a source stays "active" after its level drops below the threshold.</summary>
     public int HoldMilliseconds { get; set; } = 250;
+}
+
+public enum MicrophoneDisplay
+{
+    /// <summary>Icon, name and level meter per source.</summary>
+    Full,
+
+    /// <summary>A dot per source, coloured by level while it's active.</summary>
+    Minimal,
+}
+
+public enum MicrophoneLabel
+{
+    /// <summary>1, 2, 3... in the order OBS lists the sources.</summary>
+    Number,
+    ShortName,
+    None,
+}
+
+public sealed class LiveWidgetSettings
+{
+    /// <summary>Show the current scene, or why OBS isn't connected, next to LIVE.</summary>
+    public bool ShowObsDetail { get; set; } = true;
 }
 
 public sealed record WidgetBounds(int X, int Y, int Width, int Height);

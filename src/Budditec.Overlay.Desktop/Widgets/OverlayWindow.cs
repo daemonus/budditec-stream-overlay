@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Budditec.Overlay.Core.Settings;
@@ -15,6 +16,7 @@ namespace Budditec.Overlay.Desktop.Widgets;
 public class OverlayWindow : Window
 {
     private readonly Border _frame;
+    private readonly Border _grip;
     private bool _editing;
 
     public string WidgetId { get; }
@@ -37,8 +39,9 @@ public class OverlayWindow : Window
         Width = bounds.Width;
         Height = bounds.Height;
 
-        var grip = new Border
+        _grip = new Border
         {
+            IsVisible = false,
             Width = 18,
             Height = 18,
             Background = new SolidColorBrush(Color.Parse("#CCBDA6FF")),
@@ -47,39 +50,30 @@ public class OverlayWindow : Window
             VerticalAlignment = VerticalAlignment.Bottom,
             Cursor = new Cursor(StandardCursorType.BottomRightCorner),
         };
-        grip.PointerPressed += (_, e) =>
-        {
-            BeginResizeDrag(WindowEdge.SouthEast, e);
-            e.Handled = true;
-        };
-
         _frame = new Border
         {
             IsVisible = false,
+            // Lets the pointer reach the widget's content (for tooltips); dragging is handled on the window.
+            IsHitTestVisible = false,
             Background = new SolidColorBrush(Color.Parse("#99101018")),
             BorderBrush = new SolidColorBrush(Color.Parse("#BDA6FF")),
             BorderThickness = new Thickness(2),
             CornerRadius = new CornerRadius(4),
-            Cursor = new Cursor(StandardCursorType.SizeAll),
-            Child = new Panel
+            Child = new TextBlock
             {
-                Children =
-                {
-                    new TextBlock
-                    {
-                        Text = $"{title}  (drag to move, {EditHotkey.Description} to finish)",
-                        Foreground = Brushes.White,
-                        FontSize = 12,
-                        Margin = new Thickness(6, 4),
-                    },
-                    grip,
-                },
+                Text = $"{title}  (drag to move, {EditHotkey.Description} to finish)",
+                Foreground = Brushes.White,
+                FontSize = 12,
+                Margin = new Thickness(6, 4),
             },
         };
-        _frame.PointerPressed += (_, e) =>
+        AddHandler(PointerPressedEvent, (_, e) =>
         {
-            if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) BeginMoveDrag(e);
-        };
+            if (!_editing || !e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
+            if (e.Source == _grip) BeginResizeDrag(WindowEdge.SouthEast, e);
+            else BeginMoveDrag(e);
+            e.Handled = true;
+        }, RoutingStrategies.Tunnel);
 
         Opened += (_, _) => OverlayInterop.SetClickThrough(this, clickThrough: true);
     }
@@ -87,7 +81,7 @@ public class OverlayWindow : Window
     /// <summary>The widget's content; the edit frame is layered on top of it.</summary>
     protected Control Body
     {
-        init => Content = new Panel { Children = { value, _frame } };
+        init => Content = new Panel { Children = { value, _frame, _grip } };
     }
 
     public bool IsEditing
@@ -96,7 +90,8 @@ public class OverlayWindow : Window
         set
         {
             _editing = value;
-            _frame.IsVisible = value;
+            _frame.IsVisible = _grip.IsVisible = value;
+            Cursor = value ? new Cursor(StandardCursorType.SizeAll) : null;
             OverlayInterop.SetClickThrough(this, clickThrough: !value);
         }
     }

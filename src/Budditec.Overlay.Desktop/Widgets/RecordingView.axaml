@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Budditec.Overlay.Desktop.Widgets"
+             x:Class="Budditec.Overlay.Desktop.Widgets.RecordingView"
+             x:DataType="vm:StatusViewModel">
+  <UserControl.Styles>
+    <StyleInclude Source="/Widgets/WidgetStyles.axaml" />
+  </UserControl.Styles>
+
+  <Border Classes="pill" Margin="6" HorizontalAlignment="Left" VerticalAlignment="Top">
+    <Border.Effect>
+      <DropShadowEffect OffsetX="1" OffsetY="1" BlurRadius="3" Color="Black" />
+    </Border.Effect>
+    <StackPanel Orientation="Horizontal" Spacing="6">
+      <Ellipse Classes="recDot" Classes.recording="{Binding IsRecording}" Classes.paused="{Binding IsPaused}"
+               Width="12" Height="12" VerticalAlignment="Center" />
+      <TextBlock Text="{Binding RecordLabel}" />
+    </StackPanel>
+  </Border>
+</UserControl>

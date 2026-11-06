@@ -17,6 +17,7 @@ namespace Budditec.Overlay.Desktop;
 public partial class App : Application
 {
     private OverlayController? _controller;
+    private EmoteCache? _emotes;
     private EditHotkey? _hotkey;
     private SettingsWindow? _settingsWindow;
     private readonly List<OverlayWindow> _widgets = [];
@@ -32,8 +33,10 @@ public partial class App : Application
             desktop.Exit += (_, _) => Shutdown();
 
             var controller = _controller = new OverlayController(new SettingsStore());
-            var emotes = new EmoteCache(controller.Http);
-            _widgets.Add(new StatusWindow(controller));
+            var emotes = _emotes = new EmoteCache(controller.Http);
+            _widgets.Add(new RecordingWindow(controller));
+            _widgets.Add(new LiveWindow(controller));
+            _widgets.Add(new MicrophonesWindow(controller));
             _widgets.Add(new ChatWindow(controller, emotes));
             ShowEnabledWidgets(controller.Settings);
             controller.SettingsChanged += ShowEnabledWidgets;
@@ -87,7 +90,7 @@ public partial class App : Application
             open.Activate();
             return;
         }
-        _settingsWindow = new SettingsWindow(new SettingsViewModel(_controller!));
+        _settingsWindow = new SettingsWindow(new SettingsViewModel(_controller!), _emotes!);
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
     }

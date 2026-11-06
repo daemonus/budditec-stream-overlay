@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Budditec.Overlay.Desktop.Widgets"
+             x:Class="Budditec.Overlay.Desktop.Widgets.LiveView"
+             x:DataType="vm:StatusViewModel">
+  <UserControl.Styles>
+    <StyleInclude Source="/Widgets/WidgetStyles.axaml" />
+  </UserControl.Styles>
+
+  <StackPanel Margin="6" Orientation="Horizontal" Spacing="6" VerticalAlignment="Top">
+    <StackPanel.Effect>
+      <DropShadowEffect OffsetX="1" OffsetY="1" BlurRadius="3" Color="Black" />
+    </StackPanel.Effect>
+    <Border Classes="pill" Classes.live="{Binding Streaming}">
+      <TextBlock Text="LIVE" />
+    </Border>
+    <TextBlock Text="{Binding ObsDetail}" IsVisible="{Binding ShowObsDetail}" FontSize="11" FontWeight="Normal" Opacity="0.8" />
+  </StackPanel>
+</UserControl>
