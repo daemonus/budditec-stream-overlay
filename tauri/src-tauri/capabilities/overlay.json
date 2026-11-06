@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "overlay",
+  "description": "Lets the bridge-served overlay pages move and resize their window in edit mode.",
+  "windows": ["chat", "status"],
+  "remote": {
+    "urls": ["http://127.0.0.1:47820/*"]
+  },
+  "permissions": ["core:default", "core:window:allow-start-dragging", "core:window:allow-start-resize-dragging"]
+}

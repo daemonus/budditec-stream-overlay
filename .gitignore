@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.DotSettings.user
+TestResults/
+
+tauri/src-tauri/target/
+tauri/src-tauri/gen/
