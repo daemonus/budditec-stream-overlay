@@ -3,15 +3,15 @@
         xmlns:vm="using:Budditec.Overlay.Desktop.Settings"
         x:Class="Budditec.Overlay.Desktop.Settings.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
-        Title="Budditec Overlay - Settings" Width="560" Height="760"
+        Title="Budditec Overlay - Settings" Width="760" Height="640"
         Icon="/Assets/icon.ico"
         WindowStartupLocation="CenterScreen">
   <Window.Styles>
     <Style Selector="HeaderedContentControl">
-      <Setter Property="Margin" Value="0,0,0,14" />
+      <Setter Property="Margin" Value="0,0,0,18" />
       <Setter Property="Template">
         <ControlTemplate>
-          <StackPanel Spacing="6">
+          <StackPanel Spacing="8">
             <TextBlock Text="{TemplateBinding Header}" FontWeight="SemiBold" FontSize="15" />
             <ContentPresenter Content="{TemplateBinding Content}" />
           </StackPanel>
@@ -21,12 +21,45 @@
     <Style Selector="Grid.form > TextBlock">
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
+    <Style Selector="TabItem">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="MinHeight" Value="38" />
+      <Setter Property="Padding" Value="14,0" />
+    </Style>
+    <Style Selector="TabItem.sub">
+      <Setter Property="Padding" Value="30,0,14,0" />
+    </Style>
+    <!-- A group label in the tab list, not a page. -->
+    <Style Selector="TabItem.group">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="Margin" Value="0,10,0,0" />
+      <Setter Property="IsHitTestVisible" Value="False" />
+      <Setter Property="Focusable" Value="False" />
+    </Style>
+    <Style Selector="ScrollViewer.page > StackPanel">
+      <Setter Property="Margin" Value="20,16" />
+    </Style>
+    <Style Selector="ColorPicker">
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <!-- Roughly a dark and a bright game scene, to judge contrast and the drop shadow. -->
+    <Style Selector="Border.preview">
+      <Setter Property="Background" Value="#2A2D34" />
+    </Style>
+    <Style Selector="Border.preview.light">
+      <Setter Property="Background" Value="#C9D6DF" />
+    </Style>
+    <Style Selector="CheckBox.enable">
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Margin" Value="0,0,0,14" />
+    </Style>
   </Window.Styles>
 
   <DockPanel>
     <Border DockPanel.Dock="Bottom" Padding="16,10" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
       <DockPanel>
-        <TextBlock DockPanel.Dock="Left" Text="{Binding Error}" Foreground="#FF6B6B" VerticalAlignment="Center" />
+        <TextBlock DockPanel.Dock="Left" Text="{Binding Error}" Foreground="#FF6B6B" VerticalAlignment="Center" TextWrapping="Wrap" />
         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
           <Button Content="Send test message" Command="{Binding TestMessageCommand}" />
           <Button Content="Apply" Command="{Binding ApplyCommand}" Classes="accent" />
@@ -34,94 +67,148 @@
       </DockPanel>
     </Border>
 
-    <ScrollViewer>
-      <StackPanel Margin="16">
-        <HeaderedContentControl Header="Connections">
-          <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
-            <TextBlock Text="Twitch channel" />
-            <TextBox Grid.Column="1" Text="{Binding TwitchChannel}" PlaceholderText="channel name or twitch.tv URL" />
-            <TextBlock Grid.Row="1" Text="Kick channel" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding KickChannel}" PlaceholderText="channel name or kick.com URL" />
-            <TextBlock Grid.Row="2" Text="YouTube channel" />
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding YouTubeChannel}" PlaceholderText="@handle, channel id or video URL" />
-            <TextBlock Grid.Row="3" Text="OBS WebSocket URL" />
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding ObsUrl}" />
-            <TextBlock Grid.Row="4" Text="OBS password" />
-            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ObsPassword}" PasswordChar="*" PlaceholderText="blank if auth is off" />
-          </Grid>
-        </HeaderedContentControl>
-
-        <HeaderedContentControl Header="Widgets">
-          <ItemsControl ItemsSource="{Binding Widgets}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="vm:SelectableWidget">
-                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsEnabled}" />
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </HeaderedContentControl>
-
-        <HeaderedContentControl Header="Chat text">
-          <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
-            <TextBlock Text="Font" />
-            <ComboBox Grid.Column="1" ItemsSource="{Binding FontFamilies}" SelectedItem="{Binding FontFamily}" HorizontalAlignment="Stretch" />
-            <TextBlock Grid.Row="1" Text="Size" />
-            <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding FontSize}" Minimum="8" Maximum="72" Increment="1" FormatString="0" />
-            <TextBlock Grid.Row="2" Text="Weight" />
-            <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding FontWeights}" SelectedItem="{Binding FontWeight}" />
-            <TextBlock Grid.Row="3" Text="Text colour" />
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding TextColor}" />
-            <TextBlock Grid.Row="4" Text="Emote size" />
-            <NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding EmoteScale}" Minimum="0.5" Maximum="4" Increment="0.1" FormatString="0.0x" />
-            <TextBlock Grid.Row="5" Text="Max messages" />
-            <NumericUpDown Grid.Row="5" Grid.Column="1" Value="{Binding MaxMessages}" Minimum="1" Maximum="500" Increment="5" FormatString="0" />
-            <TextBlock Grid.Row="6" Text="Fade after (s)" />
-            <NumericUpDown Grid.Row="6" Grid.Column="1" Value="{Binding FadeAfterSeconds}" Minimum="0" Maximum="3600" Increment="5" FormatString="0" PlaceholderText="0 = never" />
-          </Grid>
-        </HeaderedContentControl>
-
-        <HeaderedContentControl Header="Names">
-          <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
-            <CheckBox Grid.ColumnSpan="2" Content="Colour names by platform (otherwise the user's own colour)" IsChecked="{Binding UsePlatformNameColors}" />
-            <TextBlock Grid.Row="1" Text="Twitch" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TwitchColor}" />
-            <TextBlock Grid.Row="2" Text="Kick" />
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding KickColor}" />
-            <TextBlock Grid.Row="3" Text="YouTube" />
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding YouTubeColor}" />
-            <CheckBox Grid.Row="4" Grid.ColumnSpan="2" Content="Show platform icon" IsChecked="{Binding ShowPlatformIcon}" />
-          </Grid>
-        </HeaderedContentControl>
-
-        <HeaderedContentControl Header="Drop shadow">
-          <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
-            <CheckBox Grid.ColumnSpan="2" Content="Enabled" IsChecked="{Binding ShadowEnabled}" />
-            <TextBlock Grid.Row="1" Text="Colour" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ShadowColor}" />
-            <TextBlock Grid.Row="2" Text="Blur" />
-            <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding ShadowBlur}" Minimum="0" Maximum="20" Increment="1" FormatString="0" />
-            <TextBlock Grid.Row="3" Text="Offset" />
-            <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding ShadowOffset}" Minimum="-10" Maximum="10" Increment="1" FormatString="0" />
-          </Grid>
-        </HeaderedContentControl>
-
-        <HeaderedContentControl Header="Microphones (from OBS)">
-          <StackPanel Spacing="6">
-            <TextBlock Text="{Binding SceneName}" Opacity="0.8" />
-            <ItemsControl ItemsSource="{Binding Sources}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="vm:SelectableSource">
-                  <CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Grid Classes="form" ColumnDefinitions="140,*">
-              <TextBlock Text="Speaking above (dB)" />
-              <NumericUpDown Grid.Column="1" Value="{Binding SpeakingThresholdDb}" Minimum="-90" Maximum="0" Increment="1" FormatString="0" />
-            </Grid>
+    <TabControl TabStripPlacement="Left" Padding="0">
+      <TabItem Header="Connections">
+        <ScrollViewer Classes="page">
+          <StackPanel>
+            <HeaderedContentControl Header="Chat channels">
+              <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                <TextBlock Text="Twitch" />
+                <TextBox Grid.Column="1" Text="{Binding TwitchChannel}" PlaceholderText="channel name or twitch.tv URL" />
+                <TextBlock Grid.Row="1" Text="Kick" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding KickChannel}" PlaceholderText="channel name or kick.com URL" />
+                <TextBlock Grid.Row="2" Text="YouTube" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding YouTubeChannel}" PlaceholderText="@handle, channel id or video URL" />
+              </Grid>
+            </HeaderedContentControl>
+            <HeaderedContentControl Header="OBS">
+              <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto" RowSpacing="6">
+                <TextBlock Text="WebSocket URL" />
+                <TextBox Grid.Column="1" Text="{Binding ObsUrl}" />
+                <TextBlock Grid.Row="1" Text="Password" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ObsPassword}" PasswordChar="*" PlaceholderText="blank if auth is off" />
+              </Grid>
+            </HeaderedContentControl>
           </StackPanel>
-        </HeaderedContentControl>
-      </StackPanel>
-    </ScrollViewer>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Classes="group" Header="WIDGETS" />
+
+      <TabItem Classes="sub" Header="Chat">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Margin="20,16,20,0" Spacing="6">
+            <CheckBox Classes="enable" Content="Show the chat widget" IsChecked="{Binding ChatEnabled}" Margin="0" />
+            <DockPanel>
+              <TextBlock Text="Preview (updates as you edit; Apply to use it)" Opacity="0.8" VerticalAlignment="Center" />
+              <CheckBox x:Name="LightPreview" Content="Light background" HorizontalAlignment="Right" />
+            </DockPanel>
+            <Border x:Name="ChatPreview" Classes="preview" Classes.light="{Binding #LightPreview.IsChecked}"
+                    Height="150" CornerRadius="6" Padding="10,6" ClipToBounds="True" />
+          </StackPanel>
+        <ScrollViewer Classes="page">
+          <StackPanel>
+            <HeaderedContentControl Header="Text">
+              <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
+                <TextBlock Text="Font" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding FontFamilies}" SelectedItem="{Binding FontFamily}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="1" Text="Size" />
+                <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding FontSize}" Minimum="8" Maximum="72" Increment="1" FormatString="0" />
+                <TextBlock Grid.Row="2" Text="Weight" />
+                <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding FontWeights}" SelectedItem="{Binding FontWeight}" />
+                <TextBlock Grid.Row="3" Text="Text colour" />
+                <ColorPicker Grid.Row="3" Grid.Column="1" Color="{Binding TextColor}" />
+                <TextBlock Grid.Row="4" Text="Emote size" />
+                <NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding EmoteScale}" Minimum="0.5" Maximum="4" Increment="0.1" FormatString="0.0x" />
+                <TextBlock Grid.Row="5" Text="Max messages" />
+                <NumericUpDown Grid.Row="5" Grid.Column="1" Value="{Binding MaxMessages}" Minimum="1" Maximum="500" Increment="5" FormatString="0" />
+                <TextBlock Grid.Row="6" Text="Fade after (s)" />
+                <NumericUpDown Grid.Row="6" Grid.Column="1" Value="{Binding FadeAfterSeconds}" Minimum="0" Maximum="3600" Increment="5" FormatString="0" PlaceholderText="0 = never" />
+              </Grid>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Header="Names">
+              <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
+                <CheckBox Grid.ColumnSpan="2" Content="Colour names by platform (otherwise the user's own colour)" IsChecked="{Binding UsePlatformNameColors}" />
+                <TextBlock Grid.Row="1" Text="Twitch" />
+                <ColorPicker Grid.Row="1" Grid.Column="1" Color="{Binding TwitchColor}" IsEnabled="{Binding UsePlatformNameColors}" />
+                <TextBlock Grid.Row="2" Text="Kick" />
+                <ColorPicker Grid.Row="2" Grid.Column="1" Color="{Binding KickColor}" IsEnabled="{Binding UsePlatformNameColors}" />
+                <TextBlock Grid.Row="3" Text="YouTube" />
+                <ColorPicker Grid.Row="3" Grid.Column="1" Color="{Binding YouTubeColor}" IsEnabled="{Binding UsePlatformNameColors}" />
+                <CheckBox Grid.Row="4" Grid.ColumnSpan="2" Content="Show platform icon" IsChecked="{Binding ShowPlatformIcon}" />
+              </Grid>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Header="Drop shadow">
+              <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+                <CheckBox Grid.ColumnSpan="2" Content="Enabled" IsChecked="{Binding ShadowEnabled}" />
+                <TextBlock Grid.Row="1" Text="Colour" />
+                <ColorPicker Grid.Row="1" Grid.Column="1" Color="{Binding ShadowColor}" />
+                <TextBlock Grid.Row="2" Text="Blur" />
+                <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding ShadowBlur}" Minimum="0" Maximum="20" Increment="1" FormatString="0" />
+                <TextBlock Grid.Row="3" Text="Offset" />
+                <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding ShadowOffset}" Minimum="-10" Maximum="10" Increment="1" FormatString="0" />
+              </Grid>
+            </HeaderedContentControl>
+          </StackPanel>
+        </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+
+      <TabItem Classes="sub" Header="Live status">
+        <ScrollViewer Classes="page">
+          <StackPanel>
+            <CheckBox Classes="enable" Content="Show the live status widget" IsChecked="{Binding LiveEnabled}" />
+            <TextBlock Text="LIVE turns red while OBS is streaming." Opacity="0.8" Margin="0,0,0,10" />
+            <CheckBox Content="Show the current scene, or why OBS isn't connected, next to LIVE" IsChecked="{Binding ShowObsDetail}" />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Classes="sub" Header="Microphone status">
+        <ScrollViewer Classes="page">
+          <StackPanel>
+            <CheckBox Classes="enable" Content="Show the microphone status widget" IsChecked="{Binding MicrophonesEnabled}" />
+            <HeaderedContentControl Header="Display">
+              <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                <TextBlock Text="Style" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding MicrophoneDisplays}" SelectedItem="{Binding MicrophoneDisplay}" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Row="1" Text="Under each dot" IsVisible="{Binding IsMinimalDisplay}" />
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding MinimalLabels}" SelectedItem="{Binding MinimalLabel}"
+                          HorizontalAlignment="Stretch" IsVisible="{Binding IsMinimalDisplay}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" IsVisible="{Binding IsMinimalDisplay}" Opacity="0.8" TextWrapping="Wrap"
+                           Text="Dots are grey when quiet, then green, yellow (above -20 dB) or red (above -9 dB) while the source is speaking. In edit mode, hover a dot to see the source's name." />
+              </Grid>
+            </HeaderedContentControl>
+            <HeaderedContentControl Header="Sources (from OBS)">
+              <StackPanel Spacing="6">
+                <TextBlock Text="{Binding SceneName}" Opacity="0.8" TextWrapping="Wrap" />
+                <ItemsControl ItemsSource="{Binding Sources}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SelectableSource">
+                      <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Grid Classes="form" ColumnDefinitions="140,*">
+                  <TextBlock Text="Speaking above (dB)" />
+                  <NumericUpDown Grid.Column="1" Value="{Binding SpeakingThresholdDb}" Minimum="-90" Maximum="0" Increment="1" FormatString="0" />
+                </Grid>
+              </StackPanel>
+            </HeaderedContentControl>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Classes="sub" Header="Recording status">
+        <ScrollViewer Classes="page">
+          <StackPanel>
+            <CheckBox Classes="enable" Content="Show the recording status widget" IsChecked="{Binding RecordingEnabled}" />
+            <TextBlock Text="REC blinks red while OBS is recording and turns yellow while paused." Opacity="0.8" TextWrapping="Wrap" />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+    </TabControl>
   </DockPanel>
 </Window>

@@ -30,7 +30,7 @@ print("app running:", app.poll() is None)
 
 tree = subprocess.run(["xwininfo", "-root", "-tree"], capture_output=True, text=True).stdout
 widgets = {}
-for m in re.finditer(r'(0x[0-9a-f]+) "(Status|Chat)":.*?(\d+)x(\d+)\+(-?\d+)\+(-?\d+)\s+\+(-?\d+)\+(-?\d+)', tree):
+for m in re.finditer(r'(0x[0-9a-f]+) "(Recording|Live|Microphones|Chat)":.*?(\d+)x(\d+)\+(-?\d+)\+(-?\d+)\s+\+(-?\d+)\+(-?\d+)', tree):
     widgets[m.group(2)] = (int(m.group(1), 16), int(m.group(7)), int(m.group(8)), int(m.group(3)), int(m.group(4)))
 print("widgets:", {k: v[1:] for k, v in widgets.items()})
 
@@ -47,7 +47,7 @@ def click_reaches_background(px, py):
 
 def report(stage):
     for name, (w, wx, wy, ww, wh) in widgets.items():
-        print(f"{stage:>18} {name:6} input rects={input_rects(w)} click reaches background={click_reaches_background(wx + ww // 2, wy + wh // 2)}")
+        print(f"{stage:>18} {name:11} input rects={input_rects(w)} click reaches background={click_reaches_background(wx + ww // 2, wy + wh // 2)}")
 
 print("warm-up click on bare background reaches it:", click_reaches_background(1500, 900))
 report("locked")

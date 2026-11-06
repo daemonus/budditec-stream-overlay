@@ -46,7 +46,11 @@ Package versions are central in `Directory.Packages.props`. Prefer versions publ
 - YouTube chat polls the web client's `youtubei/v1/live_chat/get_live_chat` (no key; the Data API quota is too
   small). Use the "Live chat" continuation, not the default "Top chat", and skip the first (history) batch.
 - obs-websocket: inputs without audio reject `GetInputMute`; `ObsMonitor` uses that as the "has audio"
-  check. `InputVolumeMeters` is opt-in and fires ~every 50 ms.
+  check. `InputVolumeMeters` is opt-in and fires ~every 50 ms. Audio-capable isn't enough to match OBS's mixer
+  (game/window capture and browser sources usually send no audio), and v5 has no "audio active" request, so
+  `ObsMonitor` only lists inputs whose meter entry has channels (`inputLevelsMul` non-empty).
+- Verify UI from code and unit tests. Don't drive the user's desktop (mouse, UI Automation, focus-stealing
+  windows); ask the user to check visuals instead.
 - Native overlay behaviour is chosen at run time (`OperatingSystem.Is*` + `[SupportedOSPlatform]`, no `#if`)
   in `Platform/OverlayInterop.cs`, from the handle `Window.TryGetPlatformHandle()` returns:
   - Windows (`WindowsOverlay`): HWND; `WS_EX_LAYERED | WS_EX_TRANSPARENT` works with Avalonia 12's
@@ -61,8 +65,14 @@ Package versions are central in `Directory.Packages.props`. Prefer versions publ
   `SettingsStore`) or `~/.config` (Linux), in `Budditec.Overlay`; the runtime watches the file and skips reloads
   of its own saves. The OBS password is stored there in plain text for now. Set `BUDDITEC_OVERLAY_SETTINGS`
   to point at a temp file when smoke-testing so the real one isn't touched.
-- Widgets are keyed by `OverlayWidgets` ids (`status`, `chat`) for both bounds and `DisabledWidgets`. Don't
-  save bounds for hidden widgets (they may never have been laid out).
+- Widgets are keyed by `OverlayWidgets` ids (`recording`, `live`, `microphones`, `chat`) for both bounds and
+  `DisabledWidgets`. Don't save bounds for hidden widgets (they may never have been laid out). The old combined
+  `status` widget is migrated by `OverlaySettings.Upgrade` (run on load).
+- In edit mode the widget frame isn't hit-testable (so content tooltips work); `OverlayWindow` starts drags from
+  a tunnelling PointerPressed handler instead. Tooltips need `ToolTip.ShouldUseOverlayLayer`, since a popup
+  window opens behind the topmost overlay.
+- Audio source choice is a hide list (`AudioWidgetSettings.HiddenSources`), so new sources and other scenes'
+  sources show by default. Settings lists hidden sources that aren't in the current scene so they can be re-shown.
 - Colours must be `#RRGGBB` or `#AARRGGBB`.
 
 ## Comments

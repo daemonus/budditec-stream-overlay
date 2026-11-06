@@ -31,7 +31,9 @@ public sealed class SettingsStore(string path)
         if (!File.Exists(Path)) return new OverlaySettings();
         try
         {
-            return JsonSerializer.Deserialize<OverlaySettings>(File.ReadAllText(Path), JsonOptions) ?? new OverlaySettings();
+            var settings = JsonSerializer.Deserialize<OverlaySettings>(File.ReadAllText(Path), JsonOptions) ?? new OverlaySettings();
+            settings.Upgrade();
+            return settings;
         }
         catch (JsonException)
         {

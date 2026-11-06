@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Budditec.Overlay.Desktop.Widgets"
+             x:Class="Budditec.Overlay.Desktop.Widgets.MicrophonesView"
+             x:DataType="vm:MicrophonesViewModel">
+  <UserControl.Styles>
+    <StyleInclude Source="/Widgets/WidgetStyles.axaml" />
+    <Style Selector="Path.mic">
+      <Setter Property="Fill" Value="#B3FFFFFF" />
+    </Style>
+    <Style Selector="Path.mic.active">
+      <Setter Property="Fill" Value="#53FC18" />
+    </Style>
+    <Style Selector="Path.mic.muted">
+      <Setter Property="Fill" Value="#FF4D4D" />
+    </Style>
+    <Style Selector="Border.meter">
+      <Setter Property="Background" Value="#B3FFFFFF" />
+    </Style>
+    <Style Selector="Border.meter.active">
+      <Setter Property="Background" Value="#53FC18" />
+    </Style>
+    <Style Selector="Ellipse.dot">
+      <Setter Property="Fill" Value="#8C8C8C" />
+    </Style>
+    <Style Selector="Ellipse.dot.green">
+      <Setter Property="Fill" Value="#53FC18" />
+    </Style>
+    <Style Selector="Ellipse.dot.yellow">
+      <Setter Property="Fill" Value="#FFD23D" />
+    </Style>
+    <Style Selector="Ellipse.dot.red">
+      <Setter Property="Fill" Value="#FF3B3B" />
+    </Style>
+    <Style Selector="Ellipse.dot.muted">
+      <Setter Property="Fill" Value="#4D4D4D" />
+      <Setter Property="Stroke" Value="#FF4D4D" />
+      <Setter Property="StrokeThickness" Value="2" />
+    </Style>
+  </UserControl.Styles>
+
+  <Panel Margin="6">
+    <Panel.Effect>
+      <DropShadowEffect OffsetX="1" OffsetY="1" BlurRadius="3" Color="Black" />
+    </Panel.Effect>
+
+    <ItemsControl ItemsSource="{Binding Sources}" IsVisible="{Binding IsFull}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <StackPanel Spacing="4" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:AudioSourceViewModel">
+          <Grid ColumnDefinitions="22,*" RowDefinitions="Auto,4">
+            <Panel Grid.RowSpan="2" Width="18" Height="18" VerticalAlignment="Center">
+              <Path Classes="mic" Classes.active="{Binding IsActive}" Classes.muted="{Binding Muted}" Stretch="Uniform"
+                    Data="M12,14 A3,3 0 0 0 15,11 V5 A3,3 0 0 0 9,5 V11 A3,3 0 0 0 12,14 Z M17,11 A5,5 0 0 1 7,11 H5 A7,7 0 0 0 11,17.9 V21 H13 V17.9 A7,7 0 0 0 19,11 Z" />
+              <Line IsVisible="{Binding Muted}" StartPoint="1,1" EndPoint="17,17" Stroke="#FF4D4D" StrokeThickness="2.5" />
+            </Panel>
+            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13" />
+            <Border Grid.Column="1" Grid.Row="1" Background="#40FFFFFF" CornerRadius="2" Width="120" HorizontalAlignment="Left">
+              <Border Classes="meter" Classes.active="{Binding IsActive}" CornerRadius="2" HorizontalAlignment="Left"
+                      Width="{Binding Level, Converter={x:Static vm:MicrophonesView.LevelToWidth}}" />
+            </Border>
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <!-- Widgets are click-through unless in edit mode, so the tooltips only show while editing. A popup window
+         tooltip opens behind the topmost overlay, so draw it in the widget's own overlay layer. -->
+    <ItemsControl ItemsSource="{Binding Sources}" IsVisible="{Binding IsMinimal}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel ItemSpacing="6" LineSpacing="4" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:AudioSourceViewModel">
+          <StackPanel Spacing="1" MinWidth="18" Background="Transparent" ToolTip.Tip="{Binding Name}" ToolTip.ShowDelay="150"
+                      ToolTip.ShouldUseOverlayLayer="True">
+            <Ellipse Classes="dot" Classes.green="{Binding IsGreen}" Classes.yellow="{Binding IsYellow}"
+                     Classes.red="{Binding IsRed}" Classes.muted="{Binding Muted}"
+                     Width="14" Height="14" HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding Label}" IsVisible="{Binding HasLabel}" FontSize="10" HorizontalAlignment="Center" />
+          </StackPanel>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Panel>
+</UserControl>
