@@ -39,6 +39,20 @@ export function setupEditing(title) {
   return { edit: m => window.setEditing(m.on) };
 }
 
+// Shows or hides this widget's page when it's turned on/off in settings. In Tauri the window itself is
+// hidden; the page keeps running so it can show the window again.
+export function widgetToggle(id) {
+  const tauriWindow = window.__TAURI__?.window.getCurrentWindow();
+  let shown = true;
+  return settings => {
+    const enabled = !settings.disabledWidgets?.includes(id);
+    if (enabled === shown) return;
+    shown = enabled;
+    if (tauriWindow) enabled ? tauriWindow.show() : tauriWindow.hide();
+    else document.body.style.visibility = enabled ? "" : "hidden";
+  };
+}
+
 // Avalonia-style #AARRGGBB to CSS #RRGGBBAA.
 export function cssColor(value) {
   return /^#[0-9a-f]{8}$/i.test(value) ? `#${value.slice(3)}${value.slice(1, 3)}` : value;

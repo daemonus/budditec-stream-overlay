@@ -7,10 +7,15 @@ only. Windows first; macOS/Linux later. Currently two prototypes share one .NET 
 
 - `src/Budditec.Overlay.Core` - UI-free: chat models (`ChatMessage` with text/emote fragments), `ChatStyle`,
   settings store, Twitch IRC / Kick / YouTube chat clients (created by `ChatSources`) + 7TV/BTTV/FFZ emotes,
-  obs-websocket v5 client and `ObsMonitor`.
-- `src/Budditec.Overlay.Desktop` - Avalonia prototype (native rendering).
+  obs-websocket v5 client and `ObsMonitor`. `OverlayRuntime` is what both front ends run: it owns settings
+  (`Apply` validates via `OverlaySettings.Validate`, saves, restarts changed services; outside edits to the
+  file are reloaded) and raises chat/OBS/settings events on background threads.
+- `src/Budditec.Overlay.Desktop` - Avalonia prototype (native rendering). `OverlayController` just marshals
+  `OverlayRuntime` events to the UI thread.
 - `src/Budditec.Overlay.Bridge` - ASP.NET Core localhost bridge (`127.0.0.1:47820`) serving `wwwroot` pages
-  and streaming Core events over `/ws`; used by the Tauri prototype.
+  (overlay widgets + `settings.html`), streaming Core events over `/ws`, and `GET`/`PUT /api/settings`;
+  used by the Tauri prototype. Requests with a foreign `Origin` are rejected and `AllowedHosts` is
+  loopback-only, so other websites can't read chat or change settings.
 - `tauri/src-tauri` - Tauri v2 shell: transparent click-through windows that load the bridge pages.
 - `tests/Budditec.Overlay.Core.Tests` - xUnit v3 tests for Core.
 
@@ -39,8 +44,13 @@ Package versions are central in `Directory.Packages.props`. Prefer versions publ
   check. `InputVolumeMeters` is opt-in and fires ~every 50 ms.
 - Click-through on Windows is `WS_EX_LAYERED | WS_EX_TRANSPARENT` (`Platform/OverlayInterop.cs`); it works
   with Avalonia 12's transparent windows without `SetLayeredWindowAttributes`.
-- Settings live in `%AppData%/Budditec.Overlay/settings.json`, shared by both prototypes (the bridge watches
-  the file). The OBS password is stored there in plain text for now.
+- Settings live in `%AppData%/Budditec.Overlay/settings.json`, shared by both prototypes (each runtime
+  watches the file and skips reloads of its own saves). The OBS password is stored there in plain text for now.
+  Set `BUDDITEC_OVERLAY_SETTINGS` to point at a temp file when smoke-testing so the real one isn't touched.
+- Widgets are keyed by `OverlayWidgets` ids (`status`, `chat`) for both bounds and `DisabledWidgets`. In Tauri a
+  disabled widget's page hides its own window (needs `core:window:allow-show/hide`), and the window-state
+  plugin only persists position/size so a hidden window isn't restored hidden.
+- Colours must be `#RRGGBB` or `#AARRGGBB` (Avalonia order); `cssColor` in `bridge.js` converts for CSS.
 
 ## Comments
 

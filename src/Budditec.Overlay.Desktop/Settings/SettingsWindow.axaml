@@ -38,9 +38,9 @@
         <HeaderedContentControl Header="Connections">
           <Grid Classes="form" ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
             <TextBlock Text="Twitch channel" />
-            <TextBox Grid.Column="1" Text="{Binding TwitchChannel}" PlaceholderText="channel name" />
+            <TextBox Grid.Column="1" Text="{Binding TwitchChannel}" PlaceholderText="channel name or twitch.tv URL" />
             <TextBlock Grid.Row="1" Text="Kick channel" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding KickChannel}" PlaceholderText="channel name" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding KickChannel}" PlaceholderText="channel name or kick.com URL" />
             <TextBlock Grid.Row="2" Text="YouTube channel" />
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding YouTubeChannel}" PlaceholderText="@handle, channel id or video URL" />
             <TextBlock Grid.Row="3" Text="OBS WebSocket URL" />
@@ -48,6 +48,16 @@
             <TextBlock Grid.Row="4" Text="OBS password" />
             <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding ObsPassword}" PasswordChar="*" PlaceholderText="blank if auth is off" />
           </Grid>
+        </HeaderedContentControl>
+
+        <HeaderedContentControl Header="Widgets">
+          <ItemsControl ItemsSource="{Binding Widgets}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:SelectableWidget">
+                <CheckBox Content="{Binding Name}" IsChecked="{Binding IsEnabled}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
         </HeaderedContentControl>
 
         <HeaderedContentControl Header="Chat text">

@@ -1,6 +1,7 @@
-import { connect, setupEditing, cssColor, withOpacity } from "./bridge.js";
+import { connect, setupEditing, cssColor, withOpacity, widgetToggle } from "./bridge.js";
 
 const chat = document.getElementById("chat");
+const toggle = widgetToggle("chat");
 let style = null;
 
 const icons = {
@@ -89,7 +90,7 @@ setInterval(() => {
 
 connect({
   ...setupEditing("Chat"),
-  settings: m => applyStyle(m.chatStyle),
+  settings: m => { toggle(m); applyStyle(m.chatStyle); },
   chat: m => {
     switch (m.event) {
       case "message": addMessage(m.message); break;

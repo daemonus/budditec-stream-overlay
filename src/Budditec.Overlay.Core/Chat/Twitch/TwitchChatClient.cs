@@ -11,7 +11,7 @@ public sealed class TwitchChatClient(string channel, ThirdPartyEmoteStore emotes
 {
     private static readonly Uri Endpoint = new("wss://irc-ws.chat.twitch.tv:443");
 
-    private readonly string _channel = channel.Trim().TrimStart('#').ToLowerInvariant();
+    private readonly string _channel = ParseChannel(channel);
     private string? _loadedRoomId;
 
     public event Action<ChatEvent>? EventRaised;
@@ -104,6 +104,16 @@ public sealed class TwitchChatClient(string channel, ThirdPartyEmoteStore emotes
                 ? DateTimeOffset.FromUnixTimeMilliseconds(ms)
                 : DateTimeOffset.UtcNow,
             IsAction: isAction);
+    }
+
+    /// <summary>Accepts "name", "#name", "@name" or a twitch.tv URL (with or without https://).</summary>
+    internal static string ParseChannel(string channel)
+    {
+        var s = channel.Trim();
+        if (s.Contains('/') && !s.Contains("://")) s = "https://" + s;
+        if (Uri.TryCreate(s, UriKind.Absolute, out var uri) && uri.Host.EndsWith("twitch.tv", StringComparison.OrdinalIgnoreCase))
+            s = uri.AbsolutePath.Trim('/').Split('/')[0];
+        return s.TrimStart('#', '@').ToLowerInvariant();
     }
 
     private void Raise(ChatEvent e) => EventRaised?.Invoke(e);

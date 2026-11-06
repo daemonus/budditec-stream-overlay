@@ -37,7 +37,12 @@ public sealed class SettingsStore(string path)
     {
         Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
         var temp = Path + ".tmp";
-        File.WriteAllText(temp, JsonSerializer.Serialize(settings, JsonOptions));
+        File.WriteAllText(temp, Serialize(settings));
         File.Move(temp, Path, overwrite: true);
     }
+
+    public static string Serialize(OverlaySettings settings) => JsonSerializer.Serialize(settings, JsonOptions);
+
+    public static OverlaySettings Clone(OverlaySettings settings) =>
+        JsonSerializer.Deserialize<OverlaySettings>(Serialize(settings), JsonOptions)!;
 }

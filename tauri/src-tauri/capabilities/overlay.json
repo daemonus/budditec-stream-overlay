@@ -1,10 +1,16 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "overlay",
-  "description": "Lets the bridge-served overlay pages move and resize their window in edit mode.",
+  "description": "Lets the bridge-served overlay pages move and resize their window in edit mode, and hide/show it when the widget is turned off/on in settings.",
   "windows": ["chat", "status"],
   "remote": {
     "urls": ["http://127.0.0.1:47820/*"]
   },
-  "permissions": ["core:default", "core:window:allow-start-dragging", "core:window:allow-start-resize-dragging"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-start-resize-dragging",
+    "core:window:allow-show",
+    "core:window:allow-hide"
+  ]
 }

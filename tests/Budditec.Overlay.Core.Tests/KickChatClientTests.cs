@@ -61,5 +61,6 @@ public class KickChatClientTests
     [InlineData("xQc", "xqc")]
     [InlineData("@xqc", "xqc")]
     [InlineData("https://kick.com/xqc/videos", "xqc")]
+    [InlineData("kick.com/xqc", "xqc")]
     public void ParsesChannelInput(string input, string slug) => Assert.Equal(slug, KickChatClient.ParseSlug(input));
 }

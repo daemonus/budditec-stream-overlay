@@ -41,6 +41,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         MaxMessages = style.MaxMessages;
         FadeAfterSeconds = style.FadeAfterSeconds;
 
+        foreach (var (id, name) in OverlayWidgets.All)
+            Widgets.Add(new SelectableWidget(id, name) { IsEnabled = s.IsWidgetEnabled(id) });
+
         SpeakingThresholdDb = s.Audio.SpeakingThresholdDb;
         LoadSources(controller.ObsStatus, s.Audio.SelectedSources);
         controller.ObsStatusChanged += OnObsStatusChanged;
@@ -78,23 +81,18 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public ObservableCollection<SelectableSource> Sources { get; } = [];
 
+    public ObservableCollection<SelectableWidget> Widgets { get; } = [];
+
     [RelayCommand]
     private void Apply()
     {
-        var colors = new[] { TextColor, TwitchColor, KickColor, YouTubeColor, ShadowColor };
-        if (colors.FirstOrDefault(c => !Color.TryParse(c, out _)) is { } bad)
-        {
-            Error = $"'{bad}' isn't a colour. Use #RRGGBB.";
-            return;
-        }
-        Error = null;
-
-        var settings = OverlayController.Clone(_controller.Settings);
-        settings.Twitch.Channel = TwitchChannel.Trim();
-        settings.Kick.Channel = KickChannel.Trim();
-        settings.YouTube.Channel = YouTubeChannel.Trim();
-        settings.Obs.Url = ObsUrl.Trim();
+        var settings = SettingsStore.Clone(_controller.Settings);
+        settings.Twitch.Channel = TwitchChannel;
+        settings.Kick.Channel = KickChannel;
+        settings.YouTube.Channel = YouTubeChannel;
+        settings.Obs.Url = ObsUrl;
         settings.Obs.Password = ObsPassword;
+        settings.DisabledWidgets = Widgets.Where(w => !w.IsEnabled).Select(w => w.Id).ToList();
         settings.ChatStyle = new ChatStyle
         {
             FontFamily = FontFamily,
@@ -120,8 +118,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         };
         settings.Audio.SpeakingThresholdDb = SpeakingThresholdDb;
         // Ticking every source is the same as "show all", which also picks up sources added later.
-        settings.Audio.SelectedSources = Sources.All(s => s.IsSelected) ? [] : Sources.Where(s => s.IsSelected).Select(s => s.Name).ToList();
-        _controller.Apply(settings);
+        // With OBS disconnected there's nothing listed, so keep the saved selection.
+        if (Sources.Count > 0)
+            settings.Audio.SelectedSources = Sources.All(s => s.IsSelected) ? [] : Sources.Where(s => s.IsSelected).Select(s => s.Name).ToList();
+        Error = _controller.Apply(settings);
     }
 
     [RelayCommand]
@@ -150,4 +150,12 @@ public sealed partial class SelectableSource(string name) : ObservableObject
     public string Name { get; } = name;
 
     [ObservableProperty] public partial bool IsSelected { get; set; }
+}
+
+public sealed partial class SelectableWidget(string id, string name) : ObservableObject
+{
+    public string Id { get; } = id;
+    public string Name { get; } = name;
+
+    [ObservableProperty] public partial bool IsEnabled { get; set; }
 }

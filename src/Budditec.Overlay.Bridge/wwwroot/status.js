@@ -1,5 +1,6 @@
-import { connect, setupEditing } from "./bridge.js";
+import { connect, setupEditing, widgetToggle } from "./bridge.js";
 
+const toggle = widgetToggle("status");
 const micPath = "M12,14 A3,3 0 0 0 15,11 V5 A3,3 0 0 0 9,5 V11 A3,3 0 0 0 12,14 Z M17,11 A5,5 0 0 1 7,11 H5 A7,7 0 0 0 11,17.9 V21 H13 V17.9 A7,7 0 0 0 19,11 Z";
 const mics = document.getElementById("mics");
 let audio = { selectedSources: [], speakingThresholdDb: -45, holdMilliseconds: 250 };
@@ -39,7 +40,7 @@ function updateLevels(levels) {
 
 connect({
   ...setupEditing("Status"),
-  settings: m => { audio = m.audio; render(); },
+  settings: m => { toggle(m); audio = m.audio; render(); },
   obs: m => { status = m.status; render(); },
   levels: m => updateLevels(m.levels),
 });

@@ -6,7 +6,7 @@ namespace Budditec.Overlay.Desktop.Widgets;
 
 public sealed class ChatWindow : OverlayWindow
 {
-    public const string Id = "chat";
+    public const string Id = OverlayWidgets.Chat;
 
     public ChatWindow(OverlayController controller, EmoteCache emotes)
         : base(Id, "Chat", new WidgetBounds(40, 300, 420, 520), controller.Settings.Widgets.GetValueOrDefault(Id))

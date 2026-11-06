@@ -36,13 +36,14 @@ public partial class App : Application
             var emotes = new EmoteCache(controller.Http);
             _widgets.Add(new StatusWindow(controller));
             _widgets.Add(new ChatWindow(controller, emotes));
-            foreach (var widget in _widgets) widget.Show();
+            ShowEnabledWidgets(controller.Settings);
+            controller.SettingsChanged += ShowEnabledWidgets;
 
             CreateTrayIcon();
             _hotkey = new EditHotkey(ToggleEditing);
             DispatcherTimer.Run(() =>
             {
-                if (!_editing) foreach (var widget in _widgets) OverlayInterop.ReassertTopmost(widget);
+                if (!_editing) foreach (var widget in _widgets.Where(w => w.IsVisible)) OverlayInterop.ReassertTopmost(widget);
                 return true;
             }, TimeSpan.FromSeconds(2));
 
@@ -60,13 +61,23 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    private void ShowEnabledWidgets(OverlaySettings settings)
+    {
+        foreach (var widget in _widgets)
+        {
+            var enabled = settings.IsWidgetEnabled(widget.WidgetId);
+            if (enabled && !widget.IsVisible) widget.Show();
+            else if (!enabled && widget.IsVisible) widget.Hide();
+        }
+    }
+
     private void ToggleEditing()
     {
         _editing = !_editing;
         foreach (var widget in _widgets)
         {
             widget.IsEditing = _editing;
-            if (!_editing) _controller!.SaveWidgetBounds(widget.WidgetId, widget.CurrentBounds);
+            if (!_editing && widget.IsVisible) _controller!.SaveWidgetBounds(widget.WidgetId, widget.CurrentBounds);
         }
     }
 

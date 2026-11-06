@@ -143,10 +143,11 @@ public sealed partial class KickChatClient(string channel, HttpClient http, Thir
         return fragments;
     }
 
-    /// <summary>Accepts "name", "@name" or a kick.com URL.</summary>
+    /// <summary>Accepts "name", "@name" or a kick.com URL (with or without https://).</summary>
     internal static string ParseSlug(string channel)
     {
         var s = channel.Trim();
+        if (s.Contains('/') && !s.Contains("://")) s = "https://" + s;
         if (Uri.TryCreate(s, UriKind.Absolute, out var uri) && uri.Host.EndsWith("kick.com", StringComparison.OrdinalIgnoreCase))
             s = uri.AbsolutePath.Trim('/').Split('/')[0];
         return s.TrimStart('@').ToLowerInvariant();

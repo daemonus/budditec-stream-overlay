@@ -6,7 +6,7 @@ namespace Budditec.Overlay.Desktop.Widgets;
 /// <summary>Recording/live state and activity for the selected OBS audio sources.</summary>
 public sealed class StatusWindow : OverlayWindow
 {
-    public const string Id = "status";
+    public const string Id = OverlayWidgets.Status;
 
     public StatusWindow(OverlayController controller)
         : base(Id, "Status", new WidgetBounds(40, 40, 320, 220), controller.Settings.Widgets.GetValueOrDefault(Id))

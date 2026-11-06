@@ -15,6 +15,7 @@ use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut,
 use tauri_plugin_window_state::{AppHandleExt, StateFlags, WindowExt};
 
 const BRIDGE: &str = "127.0.0.1:47820";
+const SETTINGS: &str = "settings";
 
 #[derive(Default)]
 struct AppState {
@@ -26,7 +27,12 @@ fn main() {
     let edit_shortcut = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyO);
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_window_state::Builder::default().build())
+        // Visibility is driven by the widget on/off settings, so only remember position and size.
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(StateFlags::POSITION | StateFlags::SIZE)
+                .build(),
+        )
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(move |app, shortcut, event| {
@@ -46,17 +52,22 @@ fn main() {
             app.global_shortcut().register(edit_shortcut)?;
 
             let edit = MenuItem::with_id(app, "edit", "Edit layout (Ctrl+Alt+O)", true, None::<&str>)?;
+            let settings = MenuItem::with_id(app, "settings", "Settings...", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?;
             TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .tooltip("Budditec Overlay (Tauri)")
-                .menu(&Menu::with_items(app, &[&edit, &quit])?)
+                .menu(&Menu::with_items(app, &[&edit, &settings, &quit])?)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "edit" => toggle_editing(app),
+                    "settings" => open_settings(app),
                     "quit" => app.exit(0),
                     _ => {}
                 })
                 .build(app)?;
+            if std::env::args().any(|a| a == "--settings") {
+                open_settings(app.handle());
+            }
             Ok(())
         })
         .build(tauri::generate_context!())
@@ -90,12 +101,32 @@ fn create_widget(app: &AppHandle, label: &str, title: &str, position: (f64, f64)
     Ok(())
 }
 
+/// The settings page is served by the bridge and shared with the browser; it's an ordinary window.
+fn open_settings(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(SETTINGS) {
+        let _ = window.set_focus();
+        return;
+    }
+    let url = format!("http://{BRIDGE}/settings.html").parse().expect("valid url");
+    if let Err(e) = WebviewWindowBuilder::new(app, SETTINGS, WebviewUrl::External(url))
+        .title("Budditec Overlay - Settings")
+        .inner_size(580.0, 780.0)
+        .center()
+        .build()
+    {
+        eprintln!("Couldn't open settings: {e}");
+    }
+}
+
 /// Edit mode: windows take the mouse so they can be dragged, and the pages show their frame.
 fn toggle_editing(app: &AppHandle) {
     let state = app.state::<AppState>();
     let mut editing = state.editing.lock().unwrap();
     *editing = !*editing;
-    for window in app.webview_windows().values() {
+    for (label, window) in app.webview_windows() {
+        if label == SETTINGS {
+            continue;
+        }
         let _ = window.set_ignore_cursor_events(!*editing);
         let _ = window.eval(format!("window.setEditing && window.setEditing({})", *editing));
     }
