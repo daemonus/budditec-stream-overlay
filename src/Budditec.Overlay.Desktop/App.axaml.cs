@@ -103,16 +103,18 @@ public partial class App : Application
 
         var tray = new TrayIcon
         {
-            Icon = CreateIcon(),
+            // macOS menu bar icons are monochrome "template" images that the OS tints to match the menu bar.
+            Icon = LoadIcon(OperatingSystem.IsMacOS() ? "tray-template.png" : "icon.ico"),
             ToolTipText = "Budditec Overlay",
             Menu = new NativeMenu { Items = { editItem, settingsItem, new NativeMenuItemSeparator(), exitItem } },
         };
+        MacOSProperties.SetIsTemplateIcon(tray, OperatingSystem.IsMacOS());
         tray.Clicked += (_, _) => OpenSettings();
         TrayIcon.SetIcons(this, [tray]);
     }
 
-    private static WindowIcon CreateIcon() =>
-        new(AssetLoader.Open(new Uri("avares://Budditec.Overlay.Desktop/Assets/icon.ico")));
+    private static WindowIcon LoadIcon(string name) =>
+        new(AssetLoader.Open(new Uri($"avares://Budditec.Overlay.Desktop/Assets/{name}")));
 
     private void Shutdown()
     {

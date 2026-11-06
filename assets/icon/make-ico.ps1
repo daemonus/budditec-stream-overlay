@@ -1,10 +1,13 @@
-# Builds the app's multi-size Windows icon from the master PNG. Run from anywhere:
+# Builds the app icons from the master PNGs. Run from anywhere:
 #   powershell -ExecutionPolicy Bypass -File assets/icon/make-ico.ps1
-# 256 px is stored as PNG; smaller sizes as 32-bit bitmaps, which every Windows API and GDI+ can read.
+# icon.ico: 256 px is stored as PNG; smaller sizes as 32-bit bitmaps, which every Windows API and GDI+ can read.
 param(
     [string]$Source = "$PSScriptRoot/icon-512.png",
+    [string]$Monochrome = "$PSScriptRoot/icon-monochrome.png",
     [string]$Output = "$PSScriptRoot/../../src/Budditec.Overlay.Desktop/Assets/icon.ico",
-    [int[]]$Sizes = @(16, 20, 24, 32, 40, 48, 64, 256)
+    [string]$TrayOutput = "$PSScriptRoot/../../src/Budditec.Overlay.Desktop/Assets/tray-template.png",
+    [int[]]$Sizes = @(16, 20, 24, 32, 40, 48, 64, 256),
+    [int]$TraySize = 64
 )
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
@@ -62,3 +65,27 @@ foreach ($image in $images) {
 foreach ($image in $images) { $out.Write([byte[]]$image[1]) }
 $out.Close()
 Write-Host "Wrote $((Resolve-Path $Output).Path) ($($Sizes -join ', ') px)"
+
+# macOS menu bar "template" icon: the monochrome artwork cropped to its opaque pixels, centred in a square.
+# macOS recolours it for light/dark menu bars and scales it to the menu bar height.
+$mono = New-Object System.Drawing.Bitmap ((Resolve-Path $Monochrome).Path)
+$minX = $mono.Width; $minY = $mono.Height; $maxX = -1; $maxY = -1
+for ($y = 0; $y -lt $mono.Height; $y++) {
+    for ($x = 0; $x -lt $mono.Width; $x++) {
+        if ($mono.GetPixel($x, $y).A -gt 16) {
+            if ($x -lt $minX) { $minX = $x }; if ($x -gt $maxX) { $maxX = $x }
+            if ($y -lt $minY) { $minY = $y }; if ($y -gt $maxY) { $maxY = $y }
+        }
+    }
+}
+$side = [Math]::Max($maxX - $minX, $maxY - $minY) + 1
+$tray = New-Object System.Drawing.Bitmap $TraySize, $TraySize, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+$g = [System.Drawing.Graphics]::FromImage($tray)
+$g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+$g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+$src = New-Object System.Drawing.Rectangle ($minX - ($side - ($maxX - $minX + 1)) / 2), ($minY - ($side - ($maxY - $minY + 1)) / 2), $side, $side
+$g.DrawImage($mono, (New-Object System.Drawing.Rectangle 0, 0, $TraySize, $TraySize), $src, [System.Drawing.GraphicsUnit]::Pixel)
+$g.Dispose(); $mono.Dispose()
+$tray.Save($TrayOutput, [System.Drawing.Imaging.ImageFormat]::Png)
+$tray.Dispose()
+Write-Host "Wrote $((Resolve-Path $TrayOutput).Path) ($TraySize px macOS menu bar template)"

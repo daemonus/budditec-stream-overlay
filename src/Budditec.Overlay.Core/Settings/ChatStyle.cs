@@ -7,7 +7,9 @@ namespace Budditec.Overlay.Core.Settings;
 /// </summary>
 public sealed class ChatStyle
 {
-    public string FontFamily { get; set; } = "Segoe UI";
+    /// <summary>Defaults to a font every install of the OS has; unknown names fall back to the system font.</summary>
+    public string FontFamily { get; set; } =
+        OperatingSystem.IsWindows() ? "Segoe UI" : OperatingSystem.IsMacOS() ? "Helvetica Neue" : "Noto Sans";
     public double FontSize { get; set; } = 18;
     public int FontWeight { get; set; } = 700;
     public string TextColor { get; set; } = "#FFFFFF";

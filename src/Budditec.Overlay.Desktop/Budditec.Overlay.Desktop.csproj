@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets\icon.ico" />
+    <AvaloniaResource Include="Assets\tray-template.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Budditec.Overlay.Core\Budditec.Overlay.Core.csproj" />
