@@ -4,6 +4,7 @@
         x:Class="Budditec.Overlay.Desktop.Settings.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
         Title="Budditec Overlay - Settings" Width="560" Height="760"
+        Icon="/Assets/icon.ico"
         WindowStartupLocation="CenterScreen">
   <Window.Styles>
     <Style Selector="HeaderedContentControl">

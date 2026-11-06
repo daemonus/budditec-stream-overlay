@@ -2,8 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Budditec.Overlay.Core.Diagnostics;
 using Budditec.Overlay.Core.Settings;
@@ -112,16 +111,8 @@ public partial class App : Application
         TrayIcon.SetIcons(this, [tray]);
     }
 
-    private static WindowIcon CreateIcon()
-    {
-        var bitmap = new RenderTargetBitmap(new PixelSize(32, 32));
-        using (var ctx = bitmap.CreateDrawingContext())
-        {
-            ctx.DrawEllipse(new SolidColorBrush(Color.Parse("#9146FF")), null, new Point(16, 16), 15, 15);
-            ctx.DrawEllipse(Brushes.White, null, new Point(16, 16), 6, 6);
-        }
-        return new WindowIcon(bitmap);
-    }
+    private static WindowIcon CreateIcon() =>
+        new(AssetLoader.Open(new Uri("avares://Budditec.Overlay.Desktop/Assets/icon.ico")));
 
     private void Shutdown()
     {
