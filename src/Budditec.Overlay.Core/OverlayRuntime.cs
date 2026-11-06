@@ -7,8 +7,8 @@ using Budditec.Overlay.Core.Settings;
 namespace Budditec.Overlay.Core;
 
 /// <summary>
-/// Owns the settings and the background services (chat sources, OBS) for either front end. Every settings
-/// change goes through here: Apply from a settings UI, or a reload when another process edits the file.
+/// Owns the settings and the background services (chat sources, OBS). Every settings change goes through
+/// here: Apply from the settings UI, or a reload when the file is edited from outside.
 /// </summary>
 /// <remarks>Events are raised on background threads.</remarks>
 public sealed class OverlayRuntime : IDisposable

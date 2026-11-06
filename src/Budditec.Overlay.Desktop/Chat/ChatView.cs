@@ -13,7 +13,7 @@ namespace Budditec.Overlay.Desktop.Chat;
 
 /// <summary>
 /// Native chat renderer: newest message at the bottom, older ones pushed up and clipped. Purely draws
-/// ChatMessage models with a ChatStyle, so a web renderer could replace it without touching the rest.
+/// ChatMessage models with a ChatStyle.
 /// </summary>
 public sealed class ChatView : UserControl
 {

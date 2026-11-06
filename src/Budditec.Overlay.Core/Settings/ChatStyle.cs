@@ -3,8 +3,7 @@ using Budditec.Overlay.Core.Chat;
 namespace Budditec.Overlay.Core.Settings;
 
 /// <summary>
-/// Renderer-agnostic chat styling. Each property maps one-to-one onto a CSS variable for a web renderer.
-/// Colours are #RRGGBB or #AARRGGBB.
+/// Renderer-agnostic chat styling. Colours are #RRGGBB or #AARRGGBB.
 /// </summary>
 public sealed class ChatStyle
 {
