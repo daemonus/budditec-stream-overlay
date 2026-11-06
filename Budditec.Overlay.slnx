@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Budditec.Overlay.Bridge/Budditec.Overlay.Bridge.csproj" />
     <Project Path="src/Budditec.Overlay.Core/Budditec.Overlay.Core.csproj" />
     <Project Path="src/Budditec.Overlay.Desktop/Budditec.Overlay.Desktop.csproj" />
   </Folder>

@@ -36,7 +36,7 @@ public sealed class OverlayController : IDisposable
     public event Action<ObsStatus>? ObsStatusChanged;
     public event Action<IReadOnlyDictionary<string, AudioLevel>>? LevelsUpdated;
 
-    /// <summary>Raised after settings are applied, including edits made by the web settings page.</summary>
+    /// <summary>Raised after settings are applied, including hand edits to the settings file.</summary>
     public event Action<OverlaySettings>? SettingsChanged;
 
     public void Start() => _runtime.Start();

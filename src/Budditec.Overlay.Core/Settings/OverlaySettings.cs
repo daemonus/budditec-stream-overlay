@@ -67,7 +67,7 @@ public sealed partial class OverlaySettings
     private static partial Regex HexColor();
 }
 
-/// <summary>The overlay widgets both front ends provide; ids key bounds and the on/off list.</summary>
+/// <summary>The overlay widgets; ids key bounds and the on/off list.</summary>
 public static class OverlayWidgets
 {
     public const string Status = "status";
